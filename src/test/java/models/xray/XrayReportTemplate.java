@@ -1,23 +1,23 @@
 package models.xray;
 
 public class XrayReportTemplate {
-    private InfoObject infoObject;
-    private TestObject[] testObjects;
+    private Info info;
+    private Test[] tests;
 
     private XrayReportTemplate() {
     }
 
-    public XrayReportTemplate(InfoObject infoObject, TestObject[] testObjects) {
-        this.infoObject = infoObject;
-        this.testObjects = testObjects;
+    public XrayReportTemplate(Info info, Test[] tests) {
+        this.info = info;
+        this.tests = tests;
     }
 
-    public InfoObject getInfoObject() {
-        return infoObject;
+    public Info getInfo() {
+        return info;
     }
 
-    public TestObject[] getTestObjects() {
-        return testObjects;
+    public Test[] getTests() {
+        return tests;
     }
     public static Builder newBuilder() {
         return new XrayReportTemplate().new Builder();
@@ -25,19 +25,19 @@ public class XrayReportTemplate {
 
     public class Builder {
 
-        private InfoObject infoObject;
-        private TestObject[] testObjects;
+        private Info info;
+        private Test[] tests;
 
         private Builder() {
         }
 
-        public Builder setInfoObject(InfoObject infoObject) {
-            XrayReportTemplate.this.infoObject = infoObject;
+        public Builder setInfo(Info info) {
+            XrayReportTemplate.this.info = info;
             return this;
         }
 
-        public Builder setTestObjects(TestObject[] testObjects) {
-            XrayReportTemplate.this.testObjects = testObjects;
+        public Builder setTests(Test[] tests) {
+            XrayReportTemplate.this.tests = tests;
             return this;
         }
 

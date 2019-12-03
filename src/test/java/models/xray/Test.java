@@ -1,17 +1,17 @@
 package models.xray;
 
-public class TestObject {
+public class Test {
     private String testKey;
     private String comment;
     private String status;
 
-    public TestObject(String testKey, String comment, String status) {
+    public Test(String testKey, String comment, String status) {
         this.testKey = testKey;
         this.comment = comment;
         this.status = status;
     }
 
-    private TestObject() {
+    private Test() {
     }
 
     public String getTestKey() {
@@ -39,7 +39,7 @@ public class TestObject {
     }
 
     public static Builder newBuilder() {
-        return new TestObject().new Builder();
+        return new Test().new Builder();
     }
 
     public class Builder {
@@ -47,22 +47,22 @@ public class TestObject {
         }
 
         public Builder setTestKey(String testKey) {
-            TestObject.this.testKey = testKey;
+            Test.this.testKey = testKey;
             return this;
         }
 
         public Builder setComment(String comment) {
-            TestObject.this.comment = comment;
+            Test.this.comment = comment;
             return this;
         }
 
         public Builder setStatus(String status) {
-            TestObject.this.status = status;
+            Test.this.status = status;
             return this;
         }
 
-        public TestObject build() {
-            return TestObject.this;
+        public Test build() {
+            return Test.this;
         }
 
     }

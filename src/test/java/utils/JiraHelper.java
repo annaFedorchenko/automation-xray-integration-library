@@ -1,8 +1,8 @@
 package utils;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import models.xray.InfoObject;
-import models.xray.TestObject;
+import models.xray.Info;
+import models.xray.Test;
 import models.xray.XrayReportTemplate;
 import org.apache.commons.codec.binary.Base64;
 
@@ -12,19 +12,37 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class JiraHelper {
+    public static Info executionInfo = new Info();
     private static XrayReportTemplate xrayReport;
-    private static List<TestObject> tests = new ArrayList<>();
+    private static List<Test> tests = new ArrayList<>();
 
-    public static void generateXrayReportJson(String description, String summary, String user, String[] environments, String xaryJsonReportFilePath) throws IOException {
+    /**
+     * This method generates xrayReport.json and
+     * should be used after all tests are finished
+     *
+     * @param xaryJsonReportFilePath - location of xrayReport.json, that will be generated
+     * @throws IOException
+     */
+    public static void generateXrayReportJson(String xaryJsonReportFilePath) throws IOException {
         xrayReport = XrayReportTemplate.newBuilder()
-                .setInfoObject(new InfoObject(summary, description, user, environments))
-                .setTestObjects(tests.stream().toArray(TestObject[]::new))
+                .setInfo(executionInfo)
+                .setTests(tests.stream().toArray(Test[]::new))
                 .build();
         new ObjectMapper().writeValue(
                 new FileOutputStream(xaryJsonReportFilePath), xrayReport);
     }
 
-    public static void sendXrayReportToJIRA(String username, String password, String jiraURL, String reportFilePath) {
+    /**
+     * This method generates xrayReport.json and sends it to jira
+     *
+     * @param username       - jira username
+     * @param password       - jira password
+     * @param jiraURL        - project url in jira
+     * @param reportFilePath - location of xrayReport.json, that will be generated
+     * @throws IOException
+     */
+    public static void sendXrayReportToJIRA(String username, String password, String jiraURL, String reportFilePath) throws IOException {
+        generateXrayReportJson(reportFilePath);
         String[] curlRequest = {"curl", "-X", "POST",
                 "-H", "Content-Type: application/json",
                 "-H", "Authorization: Basic " + encodeBase64String(username + ":" + password),
@@ -41,13 +59,20 @@ public class JiraHelper {
         }
     }
 
-    public void afterScenario(String jiraTicketNumber, boolean isScenarioFailed) {
-        TestObject existingTest = JiraHelper.tests.stream()
+    /**
+     * This method should be used after each test
+     * It collects jiraTicketNumber and statuses and stores then in list of test objects
+     *
+     * @param jiraTicketNumber
+     * @param isScenarioFailed
+     */
+    public static void afterScenario(String jiraTicketNumber, boolean isScenarioFailed) {
+        Test existingTest = JiraHelper.tests.stream()
                 .filter(i -> i.getTestKey().equals(jiraTicketNumber))
                 .findAny()
                 .orElse(null);
         if (existingTest == null) {
-            TestObject test = TestObject.newBuilder()
+            Test test = Test.newBuilder()
                     .setComment("Successful execution")
                     .setStatus(getScenarioStatus(isScenarioFailed))
                     .setTestKey(jiraTicketNumber)
@@ -60,23 +85,11 @@ public class JiraHelper {
         }
     }
 
-
-    //Cucumber only
-    public String getJiraTicketNumber(List<String> tags, String projectId) {
-        return tags.stream()
-                .filter((i) -> i.contains(projectId))
-                .map((i) -> i.replace("@", ""))
-                .findFirst()
-                .orElse(null);
-    }
-
-    private String getScenarioStatus(boolean isScenarioFailed) {
+    private static String getScenarioStatus(boolean isScenarioFailed) {
         return isScenarioFailed ? "FAIL" : "PASS";
     }
 
     private static String encodeBase64String(String inputString) {
         return Base64.encodeBase64URLSafeString(inputString.getBytes());
     }
-
-
 }
