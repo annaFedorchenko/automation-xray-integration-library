@@ -3,7 +3,7 @@ The project contains methods that help in generating and sending X-ray report js
 https://confluence.xpand-it.com/display/public/XRAY/Import+Execution+Results+-+REST#ImportExecutionResults-REST-XrayJSONresults
 
 ## Instalation
-1) package project using mvn package commane or downloading .jar file from confluence page
+1) package project using 'mvn package' command or downloading .jar file from confluence page
 2) add .jar file(e.g.xray-integration-library-1.0-SNAPSHOT.jar) to libs folder of the project
 3) update pom.xml with dependency
 ```java
