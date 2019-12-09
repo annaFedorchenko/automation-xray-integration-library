@@ -2,6 +2,21 @@
 The project contains methods that help in generating and sending X-ray report json. 
 https://confluence.xpand-it.com/display/public/XRAY/Import+Execution+Results+-+REST#ImportExecutionResults-REST-XrayJSONresults
 
+## Instalation
+1) package project using mvn package commane or downloading .jar file from confluence page
+2) add .jar file(e.g.xray-integration-library-1.0-SNAPSHOT.jar) to libs folder of the project
+3) update pom.xml with dependency
+```java
+ <dependency>
+            <groupId>models.xray</groupId>
+            <artifactId>xray-integration-library</artifactId>
+            <version>1.0-SNAPSHOT</version>
+            <scope>system</scope>
+            <systemPath>${basedir}/libs/xray-integration-library-1.0-SNAPSHOT.jar</systemPath>
+        </dependency>
+```
+4) refresh dependencies on the project
+
 ## Tutorial
 To generate xray-report json perform the next steps:
 1) add JiraHelper.afterScenario() method exectution after each test
