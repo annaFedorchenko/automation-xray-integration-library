@@ -3,12 +3,14 @@ package utils;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import models.xray.Info;
 import models.xray.Test;
+import models.xray.TestStatus;
 import models.xray.XrayReportTemplate;
 import org.apache.commons.codec.binary.Base64;
 
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class JiraHelper {
@@ -41,7 +43,7 @@ public class JiraHelper {
      * @param reportFilePath - location of xrayReport.json, that will be generated
      * @throws IOException
      */
-    public static void sendXrayReportToJIRA(String username, String password, String jiraURL, String reportFilePath) throws IOException {
+    public static String sendXrayReportToJIRA(String username, String password, String jiraURL, String reportFilePath) throws IOException {
         generateXrayReportJson(reportFilePath);
         String[] curlRequest = {"curl", "-X", "POST",
                 "-H", "Content-Type: application/json",
@@ -57,6 +59,7 @@ public class JiraHelper {
         } catch (IOException e) {
             e.printStackTrace();
         }
+        return Arrays.toString(curlRequest);
     }
 
     /**
@@ -64,9 +67,9 @@ public class JiraHelper {
      * It collects jiraTicketNumber and statuses and stores then in list of test objects
      *
      * @param jiraTicketNumber
-     * @param isScenarioFailed
+     * @param testStatus
      */
-    public static void afterScenario(String jiraTicketNumber, boolean isScenarioFailed) {
+    public static void afterScenario(String jiraTicketNumber, TestStatus testStatus) {
         Test existingTest = JiraHelper.tests.stream()
                 .filter(i -> i.getTestKey().equals(jiraTicketNumber))
                 .findAny()
@@ -74,19 +77,13 @@ public class JiraHelper {
         if (existingTest == null) {
             Test test = Test.newBuilder()
                     .setComment("Successful execution")
-                    .setStatus(getScenarioStatus(isScenarioFailed))
+                    .setStatus(testStatus.toString())
                     .setTestKey(jiraTicketNumber)
                     .build();
             JiraHelper.tests.add(test);
         } else {
-            if (isScenarioFailed) {
-                existingTest.setStatus("FAIL");
-            }
+            existingTest.setStatus(testStatus.toString());
         }
-    }
-
-    private static String getScenarioStatus(boolean isScenarioFailed) {
-        return isScenarioFailed ? "FAIL" : "PASS";
     }
 
     private static String encodeBase64String(String inputString) {
