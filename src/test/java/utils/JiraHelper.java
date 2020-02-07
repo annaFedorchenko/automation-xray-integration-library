@@ -7,7 +7,9 @@ import models.xray.TestStatus;
 import models.xray.XrayReportTemplate;
 import org.apache.commons.codec.binary.Base64;
 
+import java.io.File;
 import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -22,16 +24,21 @@ public class JiraHelper {
      * This method generates xrayReport.json and
      * should be used after all tests are finished
      *
-     * @param xaryJsonReportFilePath - location of xrayReport.json, that will be generated
+     * @param xrayJsonReportFilePath - location of xrayReport.json, that will be generated
      * @throws IOException
      */
-    public static void generateXrayReportJson(String xaryJsonReportFilePath) throws IOException {
+    public static void generateXrayReportJson(String xrayJsonReportFilePath) throws IOException {
         xrayReport = XrayReportTemplate.newBuilder()
                 .setInfo(executionInfo)
                 .setTests(tests.stream().toArray(Test[]::new))
                 .build();
-        new ObjectMapper().writeValue(
-                new FileOutputStream(xaryJsonReportFilePath), xrayReport);
+
+        File file = new File(xrayJsonReportFilePath);
+        file.getParentFile().mkdirs();
+        new FileWriter(file);
+
+        (new ObjectMapper()).writeValue(new FileOutputStream(xrayJsonReportFilePath), xrayReport);
+
     }
 
     /**
@@ -84,6 +91,22 @@ public class JiraHelper {
         } else {
             existingTest.setStatus(testStatus.toString());
         }
+    }
+
+    /**
+     * This method should be used after each test
+     * It collects jiraTicketNumber and statuses and stores then in list of test objects
+     *
+     * @param jiraTicketNumber
+     * @param isScenarioFailed
+     */
+    public static void afterScenario(String jiraTicketNumber, boolean isScenarioFailed) {
+        TestStatus testStatus =  isScenarioFailed ? TestStatus.FAIL : TestStatus.PASS;
+        afterScenario(jiraTicketNumber, testStatus);
+    }
+
+    private static String getScenarioStatus(boolean isScenarioFailed) {
+        return isScenarioFailed ? "FAIL" : "PASS";
     }
 
     private static String encodeBase64String(String inputString) {
